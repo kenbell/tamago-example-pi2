@@ -1,0 +1,2 @@
+fatload mmc 0:1 0x10000000 example-pi-2
+bootelf 0x10000000
