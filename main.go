@@ -7,8 +7,8 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/f-secure-foundry/tamago/pi"
-	"github.com/f-secure-foundry/tamago/pi/pi2"
+	"github.com/f-secure-foundry/tamago/board/pi-foundation"
+	"github.com/f-secure-foundry/tamago/board/pi-foundation/pi2"
 )
 
 func main() {
@@ -81,21 +81,17 @@ func main() {
 
 	log.Println("-- LED ---------------------------------------------------------------")
 
-	log.Println("Flashing the activity LED")
+	log.Println("Flashing the LEDs")
 
 	board := pi2.Board
 
-	l := board.LEDs()[0]
-
 	ledOn := false
-	l.Init()
-	for i := 0; i < 40; i++ {
+	for {
 		time.Sleep(250 * time.Millisecond)
 		ledOn = !ledOn
-		l.SetState(ledOn)
+		board.LED("activity", ledOn)
+		board.LED("power", !ledOn)
 	}
-
-	log.Println("-- DONE --------------------------------------------------------------")
 }
 
 func allocateAndWipe(count int) {
