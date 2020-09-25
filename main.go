@@ -7,13 +7,11 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/f-secure-foundry/tamago/board/pi-foundation"
-	"github.com/f-secure-foundry/tamago/board/pi-foundation/pi2"
+	pi "github.com/f-secure-foundry/tamago/board/raspberrypi"
+	"github.com/f-secure-foundry/tamago/board/raspberrypi/pi2"
 )
 
-func main() {
-	log.Println("Hello World!")
-
+func rng() {
 	log.Println("-- rng -------------------------------------------------------------")
 
 	c := 10
@@ -42,26 +40,32 @@ func main() {
 	}
 
 	log.Printf("retrieved %d random bytes in %s", size*count, time.Since(start))
+}
 
+func timer() {
 	log.Println("-- timer -------------------------------------------------------------")
 
 	t := time.NewTimer(time.Second)
 	log.Printf("waking up timer after %v", time.Second)
 
-	start = time.Now()
+	start := time.Now()
 
 	for now := range t.C {
 		log.Printf("woke up at %d (%v)", now.Nanosecond(), now.Sub(start))
 		break
 	}
+}
 
+func ram() {
 	log.Println("-- RAM ---------------------------------------------------------------")
 
 	// Check GC is working by forcing more total allocation than available
-	allocateAndWipe(900)
+	allocateAndWipe(700)
 	runtime.GC()
-	allocateAndWipe(900)
+	allocateAndWipe(700)
+}
 
+func watchdog() {
 	log.Println("-- watchdog ----------------------------------------------------------")
 
 	log.Println("Starting watchdog at 1s")
@@ -78,6 +82,15 @@ func main() {
 	pi.Watchdog.Stop()
 	log.Print("Watchdog stopped, waiting for 2 sec")
 	time.Sleep(2 * time.Second)
+}
+
+func main() {
+	log.Println("Hello World!")
+
+	rng()
+	timer()
+	ram()
+	watchdog()
 
 	log.Println("-- LED ---------------------------------------------------------------")
 
@@ -97,7 +110,7 @@ func main() {
 func allocateAndWipe(count int) {
 	log.Printf("allocating %dMB", count)
 
-	hold := make([][]byte, 0, 400)
+	hold := make([][]byte, 0, count)
 	for i := 0; i < cap(hold); i++ {
 		mem := make([]byte, 1024*1024)
 		if len(mem) == 0 {
